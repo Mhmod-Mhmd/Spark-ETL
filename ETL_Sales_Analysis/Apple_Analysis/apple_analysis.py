@@ -29,24 +29,37 @@ class FirstWorkFow:
 
         print(" ETL Pipeline Workflow completed successfully") 
 
-class SecondWordflow:
+
+class SecondWorkflow:
         def __init__(self):
             pass
         def runner(self):
-            pass
+        
+            # Step 1: Extract all required Data from different sources
+            dfs = DataExtractor().extract()
+
+            # Step 2: Transform Data for Customers who have bought AirPods after buying Iphone
+            transformedData = SecondTransformation().CustomerAirpodsIphone(dfs)
+            # transformedData.show()
+
+            # Step 3: Load Data to different Sources
+            loadAirpodsAfterIphone(transformedData).load()
 
 
 class WorkFlowRun:
     def __init__(self, transformation_name):
-        self.name = transformation_name
+        self.transformation_name = transformation_name
+
     def run(self):
-        if lower(self.name) == "airpodsafteriphone":
+        if self.transformation_name == "airpodsafteriphone":
             return FirstWorkFow().runner()
-        elif lower(self.name) == "airpodswithiphone":
-            return SecondWorkFow().runner()
+        elif self.transformation_name == "airpodswithiphone":
+            return SecondWorkflow().runner()
         else:
             print("this is not defined as a transformed")
 
-trans_name = 'airpodsafteriphone'
+
+trans_name = 'airpodswithiphone'
 WorkFlowRun(trans_name).run()
+
 # COMMAND ----------
