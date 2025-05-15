@@ -1,11 +1,24 @@
 # Databricks notebook source
-class Load:
+# %run "./Loader_Factory"
+import Loader_Factory
 
-    def __init__(self):
+class Loader:
+    """ Abstract Class """
+    def __init__(self, transformeddf):
+        self.transformeddf = transformeddf
+
+    def load(self):
         pass
 
-    def sink(self):
-        pass
+class loadAirpodsAfterIphone(Loader):
+
+    def load(self):
+        writeData(load_type = "dbfs", 
+                  path = "dbfs:/FileStore/tables/Apple_Data/Output", 
+                  df = self.transformeddf, 
+                  writemode = "overwrite" )\
+        .save_data_frame()
+        
 
 # COMMAND ----------
 
