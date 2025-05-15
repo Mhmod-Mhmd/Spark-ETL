@@ -1,6 +1,7 @@
 # Databricks notebook source
 from pyspark.sql.window import Window
-from pyspark.sql.functions import lead, col
+from pyspark.sql.functions import lag, lead, lower, broadcast, col, collect_list, collect_set, array_contains, size
+
 
 class FirstTransformer:
 
@@ -25,6 +26,31 @@ class FirstTransformer:
 
         # Show the result
         joined_df.show()
+
+
+class SecondTransformation(Transformation):
+    """ 
+        Customer who have bought both airpods and iphone
+    """
+
+    def CustomerAirpodsIphone(self, inputDfs):
+
+        transactiondf = inputDfs.get('transactionDF')
+        customerdf = inputDfs.get('customerDF')
+        
+        transformedDF = transactiondf.groupBy(col("customer_id")).agg(collect_set(col("product_name")).alias("product_set"))
+        
+        transformedDF = transformedDF.filter((size(col("product_set")) == 2) & 
+                                            array_contains(col("product_set"), "iPhone") &
+                                            array_contains(col("product_set"), "AirPods")
+                                            )
+        
+        joinDF = transformedDF.join( customerdf, "customer_id" ).select(col("customer_name"), col("product_set"))
+        joinDF.show()
+
+        return joinDF
+
+
 
 
 # COMMAND ----------
