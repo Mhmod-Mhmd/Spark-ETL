@@ -8,7 +8,7 @@ import Extractor
 import Transformer
 import Loader
 
-class WorkFow:
+class FirstWorkFow:
 
     def __init__(self):
         pass
@@ -29,9 +29,24 @@ class WorkFow:
 
         print(" ETL Pipeline Workflow completed successfully") 
 
+class SecondWordflow:
+        def __init__(self):
+            pass
+        def runner(self):
+            pass
 
-if __name__ = "__main__":
-    workflow = WorkFow()
-    workflow.runner()
 
+class WorkFlowRun:
+    def __init__(self, transformation_name):
+        self.name = transformation_name
+    def run(self):
+        if lower(self.name) == "airpodsafteriphone":
+            return FirstWorkFow().runner()
+        elif lower(self.name) == "airpodswithiphone":
+            return SecondWorkFow().runner()
+        else:
+            print("this is not defined as a transformed")
+
+trans_name = 'airpodsafteriphone'
+WorkFlowRun(trans_name).run()
 # COMMAND ----------
