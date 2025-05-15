@@ -1,104 +1,12 @@
 # Databricks notebook source
-# MAGIC %md
-# MAGIC Customer who have bought airpods after buying iphone
-# MAGIC Customer who have bought both airpods and iphone
-# MAGIC list all product bought by customer
 
-# COMMAND ----------
+# %run "./Extractor"
+# %run "./Transformer"
+# %run "./Loader"
 
-# MAGIC %run "./Extractor"
-
-# COMMAND ----------
-
-# MAGIC %run "./Loader_Factory"
-
-# COMMAND ----------
-
-
-# COMMAND ----------
-
-from pyspark.sql.window import Window
-from pyspark.sql.functions import lead, col, broadcast
-
-class AirPodsAfterIphoneTransformer:
-    """
-        Customers who have bought AirPods after buying Iphone 
-    """
-    def __init__(self):
-        pass
-
-    def transform(self, Input_DFs):
-        
-        transaction_df = Input_DFs.get('transactionInputDF')
-        customer_df = Input_DFs.get('customerInputDF')
-
-        windowSpec = Window.orderBy('transaction_date').partitionBy('customer_id')
-        transaction_df = transaction_df.withColumn('next_product_name', lead('product_name').over(windowSpec))
-        transaction_df_filtered = transaction_df.filter((col('next_product_name') == 'AirPods') & (col('product_name') == 'iPhone' ))
-        print('Filtered Transaction DF')
-        transaction_df_filtered.show()
-
-        transaction_df_filtered = transaction_df_filtered.withColumn("customer_id", col("customer_id").cast("string"))
-        customer_df = customer_df.withColumn("customer_id", col("customer_id").cast("string"))
-
-        # Perform the join
-        joined_dfs = customer_df.join(
-                                    broadcast(transaction_df_filtered), 
-                                    on="customer_id", 
-                                    how="inner")
-
-        # Show the result
-        print('Joined DataFrams [customer_DF, transaction_df]')
-        joined_dfs.show()
-
-        # selected Tables
-        print('Selected Tables')
-        selected_tables = joined_dfs.select(['customer_name', 'transaction_date', 'join_date','location'])
-        selected_tables.show()
-
-        return selected_tables
-
-
-
-
-# COMMAND ----------
-
-class AbstractLoader:
-    """ 
-    Abstract Class
-    """
-    def __init__(self, TransFormedDF):
-        self.TransFormedDF = TransFormedDF
-
-
-
-class SaveAirpodsAfterIphoneDF(AbstractLoader):
-
-
-    def Load(self):
-        """
-        Save Data frame without partition
-        """
-
-        writeData(
-            load_type = 'dbfs',
-            df = self.TransFormedDF,
-            path = 'dbfs:/FileStore/tables/Apple_Data/Output',
-            writemode = 'overwrite').save_data_frame()
-
-
-
-        
-
-
-# COMMAND ----------
-
-df_read = spark.read.parquet("dbfs:/FileStore/tables/Apple_Data/Output")
-df_read.show()
-
-
-# COMMAND ----------
-
+import Extractor
+import Transformer
+import Loader
 
 class WorkFow:
 
@@ -108,17 +16,22 @@ class WorkFow:
     def runner(self):
         
         # Step 1: Extract all required Data from different sources
-        InputDFs = DataExtractor().extract()
+        DFs = DataExtractor().extract()
+        print("Data Extracted Sucessfully!")
         
         # Step 2: Transform Data for Customers who have bought AirPods after buying Iphone
-        TransFormedDF = AirPodsAfterIphoneTransformer().transform(InputDFs)
+        TransFormedDF = FirstTransformation().transform(DFs)
+        print(" Transformtion is done successfully")
 
         # Step 3: Load Data to different Sources
         SaveAirpodsAfterIphoneDF(TransFormedDF).Load()
-    
+        print(" Transformed Data Loaded Sucessfully)
+
+        print(" ETL Pipeline Workflow completed successfully") 
 
 
-workflow = WorkFow()
-workflow.runner()
+if __name__ = "__main__":
+    workflow = WorkFow()
+    workflow.runner()
 
 # COMMAND ----------
