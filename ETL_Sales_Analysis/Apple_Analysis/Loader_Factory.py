@@ -17,7 +17,7 @@ class SaveToDBFS(DataLoader):
 
     def save_data_frame(self):
 
-        self.df.write.mode(self.mode).save(self.filePath)
+        self.df.write.mode(self.mode).option("overwriteSchema", "true").save(self.filePath)
         # save(self.path) save df to parquet file by default unless there is no format specified
 
 class SaveToDBFSByPartition(DataLoader):
