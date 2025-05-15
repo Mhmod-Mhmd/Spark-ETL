@@ -6,7 +6,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Reader_Factory"
+# MAGIC %run "./Extractor"
 
 # COMMAND ----------
 
@@ -14,30 +14,6 @@
 
 # COMMAND ----------
 
-class DataExtractor:
-    """
-    Implement steps for extract or read the data 
-    """
-    def extract(self):
-        customerInputDF = (
-                            GetData().
-                            get_data_source(
-                                data_type = 'csv', 
-                                path = "/FileStore/tables/Apple_Data/Customer_Updated.csv").
-                            get_data_frame()
-                            )
-        
-        transactionInputDF =(
-                            GetData.
-                            get_data_source(data_type= 'csv',
-                                             path= "/FileStore/tables/Apple_Data/Transaction_Updated.csv").
-                            get_data_frame() 
-                            )
-        
-        InputDFs = {'customerInputDF': customerInputDF,
-                    'transactionInputDF': transactionInputDF }
-        
-        return InputDFs
 
 # COMMAND ----------
 
@@ -146,32 +122,3 @@ workflow = WorkFow()
 workflow.runner()
 
 # COMMAND ----------
-
-
-
-
-# COMMAND ----------
-
-customer_df = (spark.
-                  read.
-                  format('csv').
-                  option('header','True').
-                  load('dbfs:/FileStore/tables/Apple_Data/Customer_Updated.csv')
-)
-
-transaction_df = (spark.
-                  read.
-                  format('csv').
-                  option('header','True').
-                  load('dbfs:/FileStore/tables/Apple_Data/Transaction_Updated.csv')
-)
-
-
-customer_df.orderBy('customer_id', 'customer_id').show()
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
